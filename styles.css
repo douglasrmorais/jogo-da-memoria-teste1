@@ -1,0 +1,424 @@
+body {
+  margin: 0;
+  background: #0f0f0f;
+  color: white;
+  text-align: center;
+  font-family: Arial;
+  overflow-x: hidden;
+}
+
+/* cursor neon */
+.cursor {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  background: rgba(0,255,255,0.3);
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 20px cyan, 0 0 40px cyan;
+  transform: translate(-50%, -50%);
+}
+
+/* loading */
+#loading {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: black;
+  color: cyan;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  z-index: 10;
+}
+
+/* menu */
+#menu {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: black;
+  color: cyan;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9;
+}
+
+#menu h2 {
+  font-size: 3rem;
+  margin-bottom: 30px;
+  color: cyan;
+  text-shadow: 0 0 20px cyan, 0 0 40px cyan;
+}
+
+#menu button {
+  font-size: 1.5rem;
+  padding: 15px 40px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(45deg, cyan, blue);
+  color: black;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+  box-shadow: 0 0 15px cyan;
+  animation: pulse 2s infinite;
+}
+
+#menu button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 25px cyan, 0 0 50px blue;
+}
+
+#menu button:active {
+  transform: scale(0.95);
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 10px cyan; }
+  50% { box-shadow: 0 0 30px cyan; }
+  100% { box-shadow: 0 0 10px cyan; }
+}
+
+/* grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 15px;
+  justify-content: center;
+  margin-top: 30px;
+  padding: 0 20px;
+}
+
+/* cards */
+.card {
+  width: 100px;
+  height: 100px;
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+}
+
+.card.flip .inner {
+  transform: rotateY(180deg);
+}
+
+.front, .back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  backface-visibility: hidden;
+}
+
+.front {
+  background: #222;
+  box-shadow: 0 0 10px cyan;
+}
+
+.back {
+  background: linear-gradient(45deg, cyan, purple);
+  transform: rotateY(180deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.card:hover {
+  transform: scale(1.08) rotate(2deg);
+  box-shadow: 0 0 20px cyan;
+}
+
+/* canvas */
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+/* ========================= */
+/* 🔥 NOVA TELA DE TRANSIÇÃO */
+/* ========================= */
+
+#winScreen {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, #000 40%, #020617 100%);
+  color: cyan;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 20;
+
+  /* animação de entrada */
+  animation: fadeIn 0.6s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* título */
+#winScreen h2 {
+  font-size: 3rem;
+  text-shadow: 0 0 20px cyan, 0 0 40px cyan;
+  margin-bottom: 20px;
+}
+
+/* textos */
+#winScreen p {
+  font-size: 1.5rem;
+  margin: 10px 0;
+  text-shadow: 0 0 10px cyan;
+}
+
+/* BOTÃO PRINCIPAL (PRÓXIMO NÍVEL) */
+#winScreen button {
+  font-size: 1.6rem;
+  padding: 18px 50px;
+  margin-top: 25px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(45deg, cyan, blue);
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+
+  box-shadow: 0 0 20px cyan, 0 0 40px blue;
+  transition: 0.3s;
+}
+
+/* efeito hover */
+#winScreen button:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 30px cyan, 0 0 60px blue;
+}
+
+/* clique */
+#winScreen button:active {
+  transform: scale(0.95);
+}
+
+/* botão piscando (destaque cinematográfico) */
+#winScreen button {
+  animation: glowPulse 1.5s infinite;
+}
+
+@keyframes glowPulse {
+  0% { box-shadow: 0 0 15px cyan; }
+  50% { box-shadow: 0 0 40px cyan, 0 0 80px blue; }
+  100% { box-shadow: 0 0 15px cyan; }
+}
+
+/* confetti */
+.confetti {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  top: -10px;
+  opacity: 0.9;
+  z-index: 9999;
+  animation: fall linear forwards;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* partículas */
+.particle {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  animation: explode 1s ease-out forwards;
+}
+
+@keyframes explode {
+  to {
+    transform: translate(var(--x), var(--y)) scale(0);
+    opacity: 0;
+  }
+}
+
+/* h1 */
+h1 {
+  font-size: 3rem;
+  margin-top: 20px;
+  text-shadow: 0 0 20px cyan;
+}
+
+/* status */
+#status {
+  font-size: 1.2rem;
+  margin: 10px 0;
+}
+
+/* info */
+.info {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.info span {
+  font-size: 1.2rem;
+}
+
+/* ========================= */
+/* 📱 MOBILE RESPONSIVO */
+/* ========================= */
+
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  /* grid mais flexível */
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: 6px;
+    padding: 8px;
+    margin-top: 18px;
+    justify-items: center;
+  }
+
+  /* cartas responsivas */
+  .card {
+    width: 100%;
+    max-width: 70px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .back {
+    font-size: 1.3rem;
+  }
+
+  /* menu */
+  #menu h2 {
+    font-size: 2rem;
+  }
+
+  #menu button {
+    font-size: 1.2rem;
+    padding: 12px 25px;
+  }
+
+  /* win screen */
+  #winScreen h2 {
+    font-size: 2rem;
+    text-align: center;
+  }
+
+  #winScreen p {
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  #winScreen button {
+    font-size: 1.2rem;
+    padding: 12px 25px;
+  }
+
+  /* h1 */
+  h1 {
+    font-size: 2rem;
+  }
+
+  /* status */
+  #status {
+    font-size: 1rem;
+  }
+
+  /* info */
+  .info {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .info span {
+    font-size: 1rem;
+  }
+
+  /* cursor desliga no mobile */
+  .cursor {
+    display: none;
+  }
+}
+
+/* ========================= */
+/* 📱 TELAS MUITO PEQUENAS */
+/* ========================= */
+
+@media (max-width: 480px) {
+  .card {
+    width: 100%;
+    max-width: 60px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .back {
+    font-size: 1rem;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+    gap: 5px;
+    padding: 5px;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  #menu h2 {
+    font-size: 1.8rem;
+  }
+
+  #menu button {
+    font-size: 1rem;
+    padding: 10px 20px;
+  }
+
+  #winScreen h2 {
+    font-size: 1.8rem;
+  }
+
+  #winScreen p {
+    font-size: 0.9rem;
+  }
+
+  #winScreen button {
+    font-size: 1rem;
+    padding: 10px 20px;
+  }
+}
