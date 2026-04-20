@@ -170,14 +170,17 @@ function checkWin() {
     lock = true;
 
     const winTitle = document.querySelector("#winScreen h2");
-    const nextBtn = document.querySelector("#winScreen button");
+    const nextBtn = document.getElementById("nextBtn");
+    const restartBtn = document.getElementById("restartBtn");
     if (level === 10) {
       winTitle.textContent = "🏆 Você Zerou o Jogo! Nível Ouro!";
-      nextBtn.style.display = "none"; // esconde o botão
+      nextBtn.style.display = "none";
+      restartBtn.style.display = "block";
       finalExplosion();
     } else {
       winTitle.textContent = "🏆 Você venceu!";
       nextBtn.style.display = "block";
+      restartBtn.style.display = "none";
       explosion();
     }
 
@@ -194,12 +197,31 @@ function checkWin() {
 function nextLevel() {
 
   if (level >= 10) {
-    // efeito final já mostrado no winScreen
-    setTimeout(() => location.reload(), 3000); // delay para ver o efeito
     return;
   }
 
   level++;
+  score = 0;
+  time = 0;
+
+  timeText.textContent = "Tempo: 00:00";
+  scoreText.textContent = "Pontos: 0";
+
+  first = null;
+  second = null;
+  lock = false;
+
+  document.body.style.background = "#000";
+  document.getElementById("winScreen").style.display = "none";
+
+  generateGame();
+  startTimer();
+  loadBestTime();
+}
+
+// 🔄 REINICIAR JOGO
+function restartGame() {
+  level = 1;
   score = 0;
   time = 0;
 

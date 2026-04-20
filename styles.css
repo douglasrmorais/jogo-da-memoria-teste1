@@ -136,10 +136,9 @@ body {
 }
 
 /* cartas douradas para nível 10 */
-.golden .back {
+.golden .front {
   background: linear-gradient(45deg, gold, yellow, orange);
-  color: black;
-  text-shadow: 0 0 5px gold;
+  box-shadow: 0 0 15px gold;
 }
 
 .card:hover {
