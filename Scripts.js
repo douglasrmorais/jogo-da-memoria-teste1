@@ -95,6 +95,9 @@ function generateGame() {
   cards.forEach(symbol => {
     const card = document.createElement("div");
     card.classList.add("card");
+    if (level === 10) {
+      card.classList.add("golden");
+    }
 
     card.innerHTML = `
       <div class="inner">
@@ -166,9 +169,20 @@ function checkWin() {
   if (score === totalPairs) {
     lock = true;
 
+    const winTitle = document.querySelector("#winScreen h2");
+    const nextBtn = document.querySelector("#winScreen button");
+    if (level === 10) {
+      winTitle.textContent = "🏆 Você Zerou o Jogo! Nível Ouro!";
+      nextBtn.style.display = "none"; // esconde o botão
+      finalExplosion();
+    } else {
+      winTitle.textContent = "🏆 Você venceu!";
+      nextBtn.style.display = "block";
+      explosion();
+    }
+
     document.getElementById("winScreen").style.display = "flex";
 
-    explosion();
     createConfetti();
 
     aiComment();
@@ -180,8 +194,8 @@ function checkWin() {
 function nextLevel() {
 
   if (level >= 10) {
-    alert("🏆 Você zerou o jogo!");
-    location.reload();
+    // efeito final já mostrado no winScreen
+    setTimeout(() => location.reload(), 3000); // delay para ver o efeito
     return;
   }
 
@@ -273,6 +287,35 @@ function explosion() {
     document.body.appendChild(particle);
 
     setTimeout(() => particle.remove(), 1000);
+  }
+}
+
+// explosão final dourada
+function finalExplosion() {
+  const colors = ["gold","yellow","orange","white","lightgoldenrodyellow"];
+  const centerX = window.innerWidth / 2;
+  const centerY = window.innerHeight / 2;
+
+  for (let i = 0; i < 120; i++) { // mais partículas
+    const particle = document.createElement("div");
+    particle.classList.add("particle");
+
+    const angle = Math.random() * 2 * Math.PI;
+    const distance = Math.random() * 300 + 100; // maior alcance
+
+    const x = Math.cos(angle) * distance;
+    const y = Math.sin(angle) * distance;
+
+    particle.style.left = centerX + "px";
+    particle.style.top = centerY + "px";
+    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+    particle.style.setProperty("--x", x + "px");
+    particle.style.setProperty("--y", y + "px");
+
+    document.body.appendChild(particle);
+
+    setTimeout(() => particle.remove(), 1500); // dura mais
   }
 }
 
