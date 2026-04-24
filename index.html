@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NeuroMemory</title>
+  <title>MemoryRace</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -11,15 +11,17 @@
 <div id="loading">Carregando...</div>
 
 <div id="menu">
-  <h2>NeuroMemory</h2>
+  <h2>MemoryRace</h2>
+  <p id="userWelcome"></p>
   <button onclick="startGame()">Jogar</button>
+  <button onclick="logout()" class="logout-btn">Sair</button>
 </div>
 
 <canvas id="bg"></canvas>
 
 <div class="cursor" id="cursor"></div>
 
-<h1>NeuroMemory</h1>
+<h1>MemoryRace</h1>
 <p id="status">Encontre os pares</p>
 
 <p id="ai"></p>
@@ -37,6 +39,14 @@
   <p id="best"></p>
   <button onclick="nextLevel()" id="nextBtn">Próximo nível ➜</button>
   <button onclick="restartGame()" id="restartBtn" style="display:none; margin-top: 10px;">Jogar Novamente 🎮</button>
+</div>
+
+<div id="completeScreen">
+  <h2>🏆 Parabéns! Você completou todas as fases!</h2>
+  <p>Você é um mestre da memória!</p>
+  <p id="completeFinalTime"></p>
+  <p id="completeBest"></p>
+  <button onclick="restartGame()">Jogar Novamente</button>
 </div>
 
 <div id="confetti-container"></div>

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MemoryRace — Login</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: #0a0a0f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Rajdhani', sans-serif;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Grade animada de fundo */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridMove 20s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes gridMove {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(60px); }
+    }
+
+    /* Brilhos de fundo */
+    .bg-glow {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      opacity: 0.15;
+    }
+    .bg-glow-1 {
+      width: 500px; height: 500px;
+      background: cyan;
+      top: -150px; left: -150px;
+      animation: drift1 12s ease-in-out infinite alternate;
+    }
+    .bg-glow-2 {
+      width: 400px; height: 400px;
+      background: #7c3aed;
+      bottom: -100px; right: -100px;
+      animation: drift2 15s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift1 {
+      from { transform: translate(0, 0); }
+      to   { transform: translate(80px, 80px); }
+    }
+    @keyframes drift2 {
+      from { transform: translate(0, 0); }
+      to   { transform: translate(-80px, -60px); }
+    }
+
+    /* Container principal */
+    .login-container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 420px;
+      padding: 20px;
+      animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Caixa do login */
+    .login-box {
+      background: rgba(10, 10, 20, 0.85);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 48px 40px;
+      backdrop-filter: blur(20px);
+      box-shadow:
+        0 0 0 1px rgba(0,255,255,0.05),
+        0 40px 80px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Linha decorativa no topo */
+    .login-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, cyan, transparent);
+    }
+
+    /* Ícone / logo */
+    .logo-wrap {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 2px solid rgba(0,255,255,0.3);
+      background: rgba(0,255,255,0.05);
+      font-size: 2rem;
+      margin-bottom: 16px;
+      position: relative;
+      animation: iconPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes iconPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,255,0.3); }
+      50%       { box-shadow: 0 0 0 12px rgba(0,255,255,0); }
+    }
+
+    .logo-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 0.05em;
+    }
+
+    .logo-title span {
+      color: cyan;
+      text-shadow: 0 0 20px cyan;
+    }
+
+    .logo-sub {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* Separador */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 28px 0;
+    }
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+    .divider span {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 0.1em;
+    }
+
+    /* Label */
+    label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: rgba(0,255,255,0.7);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* Input */
+    .input-wrap {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(0,255,255,0.15);
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 400;
+      outline: none;
+      transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+      letter-spacing: 0.05em;
+    }
+
+    input[type="text"]::placeholder {
+      color: rgba(255,255,255,0.2);
+    }
+
+    input[type="text"]:focus {
+      border-color: rgba(0,255,255,0.5);
+      background: rgba(0,255,255,0.04);
+      box-shadow: 0 0 0 3px rgba(0,255,255,0.08);
+    }
+
+    /* Botão entrar */
+    .btn-enter {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(0,255,255,0.9) 0%, rgba(0,180,255,0.9) 100%);
+      color: #000;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-enter::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .btn-enter:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,255,255,0.4);
+    }
+    .btn-enter:hover::after { opacity: 1; }
+    .btn-enter:active { transform: translateY(0) scale(0.98); }
+
+    /* Erro */
+    .error-msg {
+      min-height: 20px;
+      font-size: 0.85rem;
+      color: #ff6b6b;
+      text-align: center;
+      margin-top: 14px;
+      letter-spacing: 0.03em;
+      transition: opacity 0.3s;
+    }
+
+    /* Rodapé da caixa */
+    .login-footer {
+      text-align: center;
+      margin-top: 28px;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 0.05em;
+    }
+
+    /* Cursor customizado */
+    .cursor {
+      position: fixed;
+      width: 16px; height: 16px;
+      background: rgba(0,255,255,0.25);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 15px cyan, 0 0 30px rgba(0,255,255,0.3);
+      transition: transform 0.1s;
+      z-index: 9999;
+    }
+
+    /* Responsivo */
+    @media (max-width: 480px) {
+      .login-box { padding: 36px 24px; }
+      .logo-title { font-size: 1.3rem; }
+      .cursor { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+  <div class="cursor" id="cursor"></div>
+
+  <div class="login-container">
+    <div class="login-box">
+
+      <div class="logo-wrap">
+        <div class="logo-icon">🧠</div>
+        <div class="logo-title"><span>Memory</span>Race</div>
+        <div class="logo-sub">Teste sua memória</div>
+      </div>
+
+      <div class="divider"><span>identificação</span></div>
+
+      <label for="username">Seu nome</label>
+      <div class="input-wrap">
+        <input
+          type="text"
+          id="username"
+          placeholder="Digite seu nome..."
+          maxlength="20"
+          autocomplete="off"
+          autofocus
+        />
+      </div>
+
+      <button class="btn-enter" onclick="entrar()">ENTRAR NO JOGO</button>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <div class="login-footer">
+        Seu progresso é salvo automaticamente
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Cursor
+    document.addEventListener("mousemove", e => {
+      const c = document.getElementById("cursor");
+      c.style.left = e.clientX + "px";
+      c.style.top  = e.clientY + "px";
+    });
+
+    // Enter no input
+    document.getElementById("username").addEventListener("keydown", e => {
+      if (e.key === "Enter") entrar();
+    });
+
+    // Função de login
+    function entrar() {
+      const input    = document.getElementById("username");
+      const errorMsg = document.getElementById("errorMsg");
+      const username = input.value.trim();
+
+      if (username.length < 2) {
+        mostrarErro("Nome deve ter pelo menos 2 caracteres.");
+        return;
+      }
+      if (username.length > 20) {
+        mostrarErro("Nome deve ter no máximo 20 caracteres.");
+        return;
+      }
+
+      // Salva sessão
+      localStorage.setItem("memoryrace_user", username);
+
+      // Se não houver progresso salvo (jogo zerado ou primeira vez), força nível 1
+      const savedLevel = localStorage.getItem("memoryrace_level_" + username);
+      if (!savedLevel) {
+        localStorage.setItem("memoryrace_level_" + username, 1);
+      }
+
+      window.location.href = "index.html";
+    }
+
+    function mostrarErro(msg) {
+      const el = document.getElementById("errorMsg");
+      el.textContent = msg;
+      setTimeout(() => { el.textContent = ""; }, 3000);
+    }
+  </script>
+</body>
+</html>

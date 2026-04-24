@@ -7,9 +7,7 @@ const cursor = document.getElementById("cursor");
 let level = 1;
 let cards = [];
 
-const levelConfig = [
-  4,6,8,10,12,14,16,18,20,22
-];
+const levelConfig = [4, 6, 8];
 
 const baseSymbols = [
   "⚡","🚀","🧠","💻","👾","🔮","🛰️","🤖","🔥","🌙",
@@ -23,21 +21,68 @@ let score = 0;
 let time = 0;
 let timer;
 
-// loading
+let currentUser = null;
+
+// =========================
+// 🔐 SISTEMA DE LOGIN (via login.html)
+// =========================
+
 window.onload = () => {
   setTimeout(() => {
     document.getElementById("loading").style.display = "none";
-    generateGame();
-    startTimer();
-    loadBestTime();
+    checkLogin();
   }, 1500);
 };
 
-// menu
+function checkLogin() {
+  const savedUser = localStorage.getItem("memoryrace_user");
+
+  if (!savedUser) {
+    // Sem sessão — redireciona para a página de login separada
+    window.location.href = "login.html";
+    return;
+  }
+
+  currentUser = savedUser;
+
+  // Carrega o nível salvo do usuário
+  const savedLevel = localStorage.getItem("memoryrace_level_" + currentUser);
+  level = savedLevel ? parseInt(savedLevel) : 1;
+
+  showMenu();
+}
+
+function showMenu() {
+  document.getElementById("menu").style.display = "flex";
+
+  const userWelcome = document.getElementById("userWelcome");
+  const savedLevel = localStorage.getItem("memoryrace_level_" + currentUser);
+
+  if (savedLevel && parseInt(savedLevel) > 1) {
+    userWelcome.textContent = `Bem-vindo de volta, ${currentUser}! Você está no nível ${savedLevel}`;
+  } else {
+    userWelcome.textContent = `Bem-vindo, ${currentUser}!`;
+  }
+}
+
+// Logout — limpa sessão e redireciona para login.html
+function logout() {
+  clearInterval(timer);
+  currentUser = null;
+  localStorage.removeItem("memoryrace_user");
+  window.location.href = "login.html";
+}
+
+// =========================
+// 🎮 MENU E INÍCIO DO JOGO
+// =========================
+
 function startGame() {
   document.getElementById("menu").style.display = "none";
 
-  level = 1;
+  const savedLevel = localStorage.getItem("memoryrace_level_" + currentUser);
+  level = savedLevel ? parseInt(savedLevel) : 1;
+
   score = 0;
   time = 0;
 
@@ -95,7 +140,8 @@ function generateGame() {
   cards.forEach(symbol => {
     const card = document.createElement("div");
     card.classList.add("card");
-    if (level === 10) {
+
+    if (level === 3) {
       card.classList.add("golden");
     }
 
@@ -111,7 +157,7 @@ function generateGame() {
   });
 }
 
-// lógica
+// lógica de flip
 function flip(card, symbol) {
   if (lock || card.classList.contains("flip")) return;
 
@@ -129,8 +175,11 @@ function flip(card, symbol) {
     score++;
     scoreText.textContent = "Pontos: " + score;
 
-    document.body.style.background =
-      `hsl(${score * 30}, 70%, 15%)`;
+    if (level === 3) {
+      document.body.style.background = `hsl(${score * 40 + 30}, 70%, 15%)`;
+    } else {
+      document.body.style.background = `hsl(${score * 30}, 70%, 15%)`;
+    }
 
     reset();
     checkWin();
@@ -168,37 +217,71 @@ function checkWin() {
 
   if (score === totalPairs) {
     lock = true;
+    clearInterval(timer);
 
     const winTitle = document.querySelector("#winScreen h2");
     const nextBtn = document.getElementById("nextBtn");
     const restartBtn = document.getElementById("restartBtn");
-    if (level === 10) {
-      winTitle.textContent = "🏆 Você Zerou o Jogo! Nível Ouro!";
-      nextBtn.style.display = "none";
-      restartBtn.style.display = "block";
-      finalExplosion();
+
+    if (level === 3) {
+      showCompleteScreen();
     } else {
+      // Mostrar tempo desta partida na winScreen
+      let minutes = Math.floor(time / 60);
+      let seconds = time % 60;
+      let formatted = String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+      document.getElementById("finalTime").textContent = "Seu tempo: " + formatted;
+
       winTitle.textContent = "🏆 Você venceu!";
       nextBtn.style.display = "block";
       restartBtn.style.display = "none";
       explosion();
+      document.getElementById("winScreen").style.display = "flex";
     }
 
-    document.getElementById("winScreen").style.display = "flex";
-
     createConfetti();
-
     aiComment();
-    saveScore(time);
+    if (level < 3) {
+      saveScore(time);
+      saveProgress();
+    }
+  }
+}
+
+// 🏆 TELA COMPLETA - NÍVEL OURO
+function showCompleteScreen() {
+  document.getElementById("completeScreen").style.display = "flex";
+  finalGoldExplosion();
+  createGoldConfetti();
+
+  // Mostrar tempo desta partida
+  let minutes = Math.floor(time / 60);
+  let seconds = time % 60;
+  let formatted = String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+  document.getElementById("completeFinalTime").textContent = "Seu tempo: " + formatted;
+
+  // Verificar e mostrar recorde do nível 3
+  const key = "bestTime_" + (currentUser || "guest") + "_level_3";
+  const best = localStorage.getItem(key);
+
+  if (!best || time < parseInt(best)) {
+    localStorage.setItem(key, time);
+    document.getElementById("completeBest").textContent = "🥇 Novo recorde!";
+  } else {
+    let bMin = Math.floor(best / 60);
+    let bSec = best % 60;
+    let bFormatted = String(bMin).padStart(2, "0") + ":" + String(bSec).padStart(2, "0");
+    document.getElementById("completeBest").textContent = "Recorde: " + bFormatted;
+  }
+
+  if (currentUser) {
+    localStorage.removeItem("memoryrace_level_" + currentUser);
   }
 }
 
 // 🚀 PRÓXIMO NÍVEL
 function nextLevel() {
-
-  if (level >= 10) {
-    return;
-  }
+  if (level >= 3) return;
 
   level++;
   score = 0;
@@ -217,73 +300,56 @@ function nextLevel() {
   generateGame();
   startTimer();
   loadBestTime();
+  saveProgress();
 }
 
-// 🔄 REINICIAR JOGO
+// 🔄 JOGAR NOVAMENTE — limpa sessão e volta para login.html
 function restartGame() {
-  level = 1;
-  score = 0;
-  time = 0;
-
-  timeText.textContent = "Tempo: 00:00";
-  scoreText.textContent = "Pontos: 0";
-
-  first = null;
-  second = null;
-  lock = false;
-
-  document.body.style.background = "#000";
-  document.getElementById("winScreen").style.display = "none";
-
-  generateGame();
-  startTimer();
-  loadBestTime();
+  clearInterval(timer);
+  localStorage.removeItem("memoryrace_user");
+  currentUser = null;
+  window.location.href = "login.html";
 }
 
-// 💾 RECORDE POR NÍVEL
-function saveScore(time) {
-  const key = "bestTime_level_" + level;
+// 💾 SALVAR PROGRESSO
+function saveProgress() {
+  if (currentUser) {
+    localStorage.setItem("memoryrace_level_" + currentUser, level);
+  }
+}
 
+// 💾 RECORDE POR USUÁRIO E NÍVEL
+function saveScore(time) {
+  const key = "bestTime_" + (currentUser || "guest") + "_level_" + level;
   let best = localStorage.getItem(key);
 
-  if (!best || time < best) {
+  if (!best || time < parseInt(best)) {
     localStorage.setItem(key, time);
     document.getElementById("best").textContent = "Novo recorde!";
   } else {
     let minutes = Math.floor(best / 60);
     let seconds = best % 60;
-
-    let formatted =
-      String(minutes).padStart(2, "0") + ":" +
-      String(seconds).padStart(2, "0");
-
-    document.getElementById("best").textContent =
-      "Recorde: " + formatted;
+    let formatted = String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+    document.getElementById("best").textContent = "Recorde: " + formatted;
   }
 }
 
 // 📊 CARREGAR RECORDE
 function loadBestTime() {
-  const key = "bestTime_level_" + level;
+  const key = "bestTime_" + (currentUser || "guest") + "_level_" + level;
   let best = localStorage.getItem(key);
 
   if (best) {
     let minutes = Math.floor(best / 60);
     let seconds = best % 60;
-
-    let formatted =
-      String(minutes).padStart(2, "0") + ":" +
-      String(seconds).padStart(2, "0");
-
-    document.getElementById("best").textContent =
-      "Recorde: " + formatted;
+    let formatted = String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+    document.getElementById("best").textContent = "Recorde: " + formatted;
   } else {
-    document.getElementById("best").textContent =
-      "Sem recorde ainda";
+    document.getElementById("best").textContent = "Sem recorde ainda";
   }
 }
 
-// efeitos
+// ✨ EFEITOS
 function explosion() {
   const colors = ["cyan","blue","purple","white","lime"];
   const centerX = window.innerWidth / 2;
@@ -296,49 +362,48 @@ function explosion() {
     const angle = Math.random() * 2 * Math.PI;
     const distance = Math.random() * 200 + 50;
 
-    const x = Math.cos(angle) * distance;
-    const y = Math.sin(angle) * distance;
-
     particle.style.left = centerX + "px";
     particle.style.top = centerY + "px";
     particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-
-    particle.style.setProperty("--x", x + "px");
-    particle.style.setProperty("--y", y + "px");
+    particle.style.setProperty("--x", Math.cos(angle) * distance + "px");
+    particle.style.setProperty("--y", Math.sin(angle) * distance + "px");
 
     document.body.appendChild(particle);
-
     setTimeout(() => particle.remove(), 1000);
   }
 }
 
-// explosão final dourada
-function finalExplosion() {
-  const colors = ["gold","yellow","orange","white","lightgoldenrodyellow"];
+function finalGoldExplosion() {
+  const colors = ["#FFD700", "#FFA500", "#FFEC8B", "#FFF8DC", "#DAA520", "#F0E68C"];
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
 
-  for (let i = 0; i < 120; i++) { // mais partículas
-    const particle = document.createElement("div");
-    particle.classList.add("particle");
+  const spawnWave = (count, maxDist, delay, duration) => {
+    setTimeout(() => {
+      for (let i = 0; i < count; i++) {
+        const particle = document.createElement("div");
+        particle.classList.add("particle");
 
-    const angle = Math.random() * 2 * Math.PI;
-    const distance = Math.random() * 300 + 100; // maior alcance
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = Math.random() * maxDist + 80;
 
-    const x = Math.cos(angle) * distance;
-    const y = Math.sin(angle) * distance;
+        particle.style.left = centerX + "px";
+        particle.style.top = centerY + "px";
+        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+        particle.style.width = Math.random() * 10 + 5 + "px";
+        particle.style.height = particle.style.width;
+        particle.style.boxShadow = `0 0 10px ${colors[Math.floor(Math.random() * colors.length)]}`;
+        particle.style.setProperty("--x", Math.cos(angle) * distance + "px");
+        particle.style.setProperty("--y", Math.sin(angle) * distance + "px");
 
-    particle.style.left = centerX + "px";
-    particle.style.top = centerY + "px";
-    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), duration);
+      }
+    }, delay);
+  };
 
-    particle.style.setProperty("--x", x + "px");
-    particle.style.setProperty("--y", y + "px");
-
-    document.body.appendChild(particle);
-
-    setTimeout(() => particle.remove(), 1500); // dura mais
-  }
+  spawnWave(150, 400, 0, 2000);
+  spawnWave(100, 350, 300, 2000);
 }
 
 function createConfetti() {
@@ -355,7 +420,33 @@ function createConfetti() {
     confetti.style.height = confetti.style.width;
 
     document.body.appendChild(confetti);
-
     setTimeout(() => confetti.remove(), 5000);
   }
+}
+
+function createGoldConfetti() {
+  const colors = ["#FFD700", "#FFA500", "#FFEC8B", "#FFF8DC", "#DAA520", "#F0E68C", "#FFE4B5"];
+
+  const spawnConfetti = (count, delay, duration) => {
+    setTimeout(() => {
+      for (let i = 0; i < count; i++) {
+        const confetti = document.createElement("div");
+        confetti.classList.add("confetti");
+
+        confetti.style.left = Math.random() * window.innerWidth + "px";
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDuration = (Math.random() * 4 + 3) + "s";
+        confetti.style.width = Math.random() * 10 + 6 + "px";
+        confetti.style.height = confetti.style.width;
+        confetti.style.boxShadow = `0 0 8px ${colors[Math.floor(Math.random() * colors.length)]}`;
+        confetti.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
+
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), duration);
+      }
+    }, delay);
+  };
+
+  spawnConfetti(150, 0, 7000);
+  spawnConfetti(100, 500, 6000);
 }
