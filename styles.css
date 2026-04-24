@@ -1,13 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+
+:root {
+  --cyan: #00ffff;
+  --purple: #7c3aed;
+  --gold: #FFD700;
+  --gold-alt: #FFA500;
+  --bg: #0f0f0f;
+  --card-size: 100px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
 body {
   margin: 0;
-  background: #0f0f0f;
+  background: var(--bg);
   color: white;
   text-align: center;
-  font-family: Arial;
+  font-family: 'Rajdhani', sans-serif;
   overflow-x: hidden;
 }
 
-/* cursor neon */
+/* ========================= */
+/* CURSOR NEON — apenas desktop */
+/* ========================= */
 .cursor {
   position: fixed;
   width: 20px;
@@ -17,148 +32,127 @@ body {
   pointer-events: none;
   box-shadow: 0 0 20px cyan, 0 0 40px cyan;
   transform: translate(-50%, -50%);
+  z-index: 9999;
+  /* Escondido por padrão em touch devices — JS ativa só no mouse */
+  display: none;
 }
 
-/* loading */
+/* ========================= */
+/* LOADING */
+/* ========================= */
 #loading {
   position: fixed;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: black;
   color: cyan;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2rem;
-  z-index: 10;
+  font-family: 'Orbitron', monospace;
+  z-index: 100;
 }
 
 /* ========================= */
-/* 🔐 TELA DE LOGIN */
+/* ELEMENTOS DE JOGO — ocultos por padrão */
 /* ========================= */
+#gameArea {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 12px 32px;
+  min-height: 100vh;
+}
 
-#loginScreen {
+h1 {
+  font-family: 'Orbitron', monospace;
+  font-size: 2.2rem;
+  margin-top: 16px;
+  text-shadow: 0 0 20px cyan;
+  color: cyan;
+}
+
+#status {
+  font-size: 1.1rem;
+  margin: 6px 0;
+  color: rgba(255,255,255,0.6);
+}
+
+#ai {
+  font-size: 1rem;
+  min-height: 24px;
+  color: rgba(0,255,255,0.8);
+  margin: 4px 0;
+}
+
+/* ========================= */
+/* INFO BAR */
+/* ========================= */
+.info {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin: 12px 0;
+  flex-wrap: wrap;
+}
+
+.info span {
+  font-size: 1.1rem;
+  color: var(--cyan);
+  font-family: 'Orbitron', monospace;
+  font-size: 0.85rem;
+}
+
+/* ========================= */
+/* CANVAS */
+/* ========================= */
+canvas {
   position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at center, #1a1a2e 0%, #0f0f0f 100%);
-  color: cyan;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 8;
+  z-index: -1;
+  pointer-events: none;
 }
 
-.login-box {
-  background: rgba(0, 0, 0, 0.8);
-  padding: 40px 50px;
-  border-radius: 20px;
-  border: 2px solid cyan;
-  box-shadow: 0 0 30px cyan, 0 0 60px rgba(0, 255, 255, 0.3);
-  text-align: center;
-}
-
-.login-box h2 {
-  font-size: 2.5rem;
-  margin-bottom: 10px;
-  text-shadow: 0 0 20px cyan;
-}
-
-.login-subtitle {
-  font-size: 1rem;
-  color: #aaa;
-  margin-bottom: 30px;
-}
-
-.login-box input {
-  width: 100%;
-  max-width: 250px;
-  padding: 15px 20px;
-  font-size: 1.2rem;
-  border: 2px solid cyan;
-  border-radius: 10px;
-  background: #1a1a1a;
-  color: white;
-  text-align: center;
-  outline: none;
-  transition: 0.3s;
-}
-
-.login-box input:focus {
-  box-shadow: 0 0 20px cyan;
-  border-color: #00ffff;
-}
-
-.login-box input::placeholder {
-  color: #666;
-}
-
-.login-box button {
-  width: 100%;
-  max-width: 250px;
-  padding: 15px 30px;
-  font-size: 1.3rem;
-  margin-top: 20px;
-  border: none;
-  border-radius: 10px;
-  background: linear-gradient(45deg, cyan, blue);
-  color: black;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
-  box-shadow: 0 0 15px cyan;
-}
-
-.login-box button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 25px cyan, 0 0 50px blue;
-}
-
-.error {
-  color: #ff4444;
-  margin-top: 15px;
-  font-size: 0.9rem;
-}
-
-/* Botão logout no menu */
-.logout-btn {
-  margin-top: 15px;
-  background: transparent !important;
-  border: 2px solid cyan !important;
-  color: cyan !important;
-  box-shadow: none !important;
-}
-
-.logout-btn:hover {
-  background: rgba(255, 0, 0, 0.2) !important;
-  border-color: #ff4444 !important;
-  color: #ff4444 !important;
-}
-
-/* menu */
+/* ========================= */
+/* MENU */
+/* ========================= */
 #menu {
   position: fixed;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: black;
   color: cyan;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 12px;
   z-index: 9;
+  padding: 20px;
+  overflow-y: auto;
 }
 
 #menu h2 {
-  font-size: 3rem;
-  margin-bottom: 30px;
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1.8rem, 6vw, 3rem);
   color: cyan;
   text-shadow: 0 0 20px cyan, 0 0 40px cyan;
+  margin-bottom: 10px;
+}
+
+#userWelcome {
+  font-size: clamp(0.9rem, 3vw, 1.1rem);
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 10px;
+  max-width: 320px;
 }
 
 #menu button {
-  font-size: 1.5rem;
-  padding: 15px 40px;
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1rem, 4vw, 1.5rem);
+  padding: 14px 40px;
   border: none;
   border-radius: 10px;
   background: linear-gradient(45deg, cyan, blue);
@@ -168,39 +162,69 @@ body {
   transition: 0.3s;
   box-shadow: 0 0 15px cyan;
   animation: pulse 2s infinite;
+  width: 100%;
+  max-width: 280px;
 }
 
 #menu button:hover {
-  transform: scale(1.1);
+  transform: scale(1.08);
   box-shadow: 0 0 25px cyan, 0 0 50px blue;
 }
 
 #menu button:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 
 @keyframes pulse {
-  0% { box-shadow: 0 0 10px cyan; }
+  0%  { box-shadow: 0 0 10px cyan; }
   50% { box-shadow: 0 0 30px cyan; }
-  100% { box-shadow: 0 0 10px cyan; }
+  100%{ box-shadow: 0 0 10px cyan; }
 }
 
-/* grid */
+/* Botão logout */
+.logout-btn {
+  background: transparent !important;
+  border: 2px solid cyan !important;
+  color: cyan !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+.logout-btn:hover {
+  background: rgba(255,0,0,0.15) !important;
+  border-color: #ff4444 !important;
+  color: #ff4444 !important;
+  box-shadow: none !important;
+}
+
+/* ========================= */
+/* GRID DE CARTAS */
+/* ========================= */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(var(--card-size), 1fr));
+  gap: 12px;
   justify-content: center;
-  margin-top: 30px;
-  padding: 0 20px;
+  margin-top: 16px;
+  padding: 0 12px;
+  width: 100%;
+  max-width: 700px;
 }
 
-/* cards */
+/* ========================= */
+/* CARTAS */
+/* ========================= */
 .card {
-  width: 100px;
-  height: 100px;
+  width: var(--card-size);
+  height: var(--card-size);
   perspective: 1000px;
   cursor: pointer;
+  justify-self: center;
+  transition: transform 0.15s;
+}
+
+.card:hover {
+  transform: scale(1.08) rotate(2deg);
 }
 
 .inner {
@@ -217,10 +241,10 @@ body {
 
 .front, .back {
   position: absolute;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   border-radius: 10px;
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .front {
@@ -236,93 +260,68 @@ body {
   justify-content: center;
   font-size: 2rem;
   color: #1a1a1a;
-  position: relative;
-  z-index: 1;
 }
 
-/* ========== CARTAS DOURADAS - NÍVEL OURO ========== */
+/* Cartas douradas — nível 3 */
 .golden .front {
   background: #1a1a1a;
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-  border: 2px solid #FFD700;
+  box-shadow: 0 0 15px rgba(255,215,0,0.5);
+  border: 2px solid var(--gold);
 }
 
-/* Parte de dentro da carta - DOURADA */
 .golden .back {
   background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%);
-  box-shadow: 0 0 25px #FFD700, 0 0 50px rgba(255, 215, 0, 0.6);
-  border: 3px solid #FFD700;
+  box-shadow: 0 0 25px #FFD700, 0 0 50px rgba(255,215,0,0.6);
+  border: 3px solid var(--gold);
   color: #1a1a1a;
   font-weight: bold;
-  font-size: 2.5rem;
+  font-size: 2.2rem;
 }
 
-/* Efeito hover especial para cartas douradas */
 .golden:hover .front {
-  box-shadow: 0 0 30px #FFD700, 0 0 60px rgba(255, 215, 0, 0.7);
-  transform: scale(1.1);
-}
-
-.card:hover {
-  transform: scale(1.08) rotate(2deg);
-  box-shadow: 0 0 20px cyan;
-}
-
-/* canvas */
-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: -1;
+  box-shadow: 0 0 30px #FFD700, 0 0 60px rgba(255,215,0,0.7);
 }
 
 /* ========================= */
-/* 🔥 TELA DE VITÓRIA */
+/* TELA DE VITÓRIA */
 /* ========================= */
-
 #winScreen {
   display: none;
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: radial-gradient(circle, #000 40%, #020617 100%);
   color: cyan;
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  gap: 12px;
   z-index: 20;
   animation: fadeIn 0.6s ease;
+  padding: 24px 20px;
+  overflow-y: auto;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(1.1);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(1.05); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 #winScreen h2 {
-  font-size: 3rem;
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1.6rem, 5vw, 3rem);
   text-shadow: 0 0 20px cyan, 0 0 40px cyan;
-  margin-bottom: 20px;
 }
 
 #winScreen p {
-  font-size: 1.5rem;
-  margin: 10px 0;
+  font-size: clamp(1rem, 3.5vw, 1.5rem);
   text-shadow: 0 0 10px cyan;
+  text-align: center;
 }
 
 #winScreen button {
-  font-size: 1.6rem;
-  padding: 18px 50px;
-  margin-top: 25px;
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1rem, 4vw, 1.6rem);
+  padding: 16px 44px;
   border: none;
   border-radius: 12px;
   background: linear-gradient(45deg, cyan, blue);
@@ -332,10 +331,12 @@ canvas {
   box-shadow: 0 0 20px cyan, 0 0 40px blue;
   transition: 0.3s;
   animation: glowPulse 1.5s infinite;
+  width: 100%;
+  max-width: 300px;
 }
 
 #winScreen button:hover {
-  transform: scale(1.15);
+  transform: scale(1.1);
   box-shadow: 0 0 30px cyan, 0 0 60px blue;
 }
 
@@ -344,168 +345,115 @@ canvas {
 }
 
 @keyframes glowPulse {
-  0% { box-shadow: 0 0 15px cyan; }
+  0%  { box-shadow: 0 0 15px cyan; }
   50% { box-shadow: 0 0 40px cyan, 0 0 80px blue; }
-  100% { box-shadow: 0 0 15px cyan; }
+  100%{ box-shadow: 0 0 15px cyan; }
 }
 
 /* ========================= */
-/* 🏆 TELA COMPLETA - NÍVEL OURO */
+/* TELA COMPLETA — NÍVEL OURO */
 /* ========================= */
-
 #completeScreen {
   display: none;
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(ellipse at center, #1a1a00 0%, #000000 70%);
-  color: #FFD700;
+  inset: 0;
+  background: radial-gradient(ellipse at center, #1a1a00 0%, #000 70%);
+  color: var(--gold);
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  gap: 12px;
   z-index: 25;
   animation: fadeInGold 0.8s ease;
+  padding: 24px 20px;
+  overflow-y: auto;
 }
 
-/* Fundo com partículas douradas */
 #completeScreen::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: 
-    radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.05) 0%, transparent 70%);
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,215,0,0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(255,215,0,0.1) 0%, transparent 50%);
   pointer-events: none;
 }
 
 @keyframes fadeInGold {
-  from {
-    opacity: 0;
-    transform: scale(1.2);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(1.1); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 #completeScreen h2 {
-  font-size: 2.8rem;
-  text-shadow: 
-    0 0 20px #FFD700,
-    0 0 40px #FFA500,
-    0 0 60px #FFD700;
-  margin-bottom: 20px;
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1.4rem, 4.5vw, 2.8rem);
+  text-shadow: 0 0 20px #FFD700, 0 0 40px #FFA500;
   animation: goldPulse 2s infinite;
+  text-align: center;
 }
 
 @keyframes goldPulse {
-  0%, 100% {
-    text-shadow: 
-      0 0 20px #FFD700,
-      0 0 40px #FFA500,
-      0 0 60px #FFD700;
-  }
-  50% {
-    text-shadow: 
-      0 0 30px #FFD700,
-      0 0 60px #FFA500,
-      0 0 90px #FFD700,
-      0 0 120px #FFA500;
-  }
+  0%, 100% { text-shadow: 0 0 20px #FFD700, 0 0 40px #FFA500; }
+  50%       { text-shadow: 0 0 40px #FFD700, 0 0 80px #FFA500; }
 }
 
 #completeScreen p {
-  font-size: 1.5rem;
-  margin: 10px 0;
+  font-size: clamp(1rem, 3.5vw, 1.5rem);
   color: #FFF8DC;
   text-shadow: 0 0 10px #FFD700;
+  text-align: center;
 }
 
 #completeScreen button {
-  font-size: 1.8rem;
-  padding: 20px 60px;
-  margin-top: 35px;
-  border: 3px solid #FFD700;
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1rem, 4vw, 1.8rem);
+  padding: 18px 50px;
+  border: 3px solid var(--gold);
   border-radius: 15px;
   background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%);
   color: #000;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 
-    0 0 30px #FFD700,
-    0 0 60px rgba(255, 215, 0, 0.5),
-    inset 0 0 20px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 30px #FFD700, 0 0 60px rgba(255,215,0,0.5);
   transition: 0.3s;
   animation: buttonGoldPulse 1.5s infinite;
   position: relative;
   overflow: hidden;
+  width: 100%;
+  max-width: 320px;
 }
 
-/* Brilho no botão */
 #completeScreen button::before {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent 40%,
-    rgba(255, 255, 255, 0.6) 50%,
-    transparent 60%
-  );
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.5) 50%, transparent 60%);
   animation: buttonShimmer 2s infinite;
 }
 
 @keyframes buttonShimmer {
-  0% {
-    transform: translateX(-100%) rotate(45deg);
-  }
-  100% {
-    transform: translateX(100%) rotate(45deg);
-  }
+  0%   { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) rotate(45deg); }
 }
 
 @keyframes buttonGoldPulse {
-  0% { 
-    box-shadow: 
-      0 0 30px #FFD700,
-      0 0 60px rgba(255, 215, 0, 0.5);
-  }
-  50% { 
-    box-shadow: 
-      0 0 50px #FFD700,
-      0 0 100px rgba(255, 215, 0, 0.7),
-      0 0 150px rgba(255, 165, 0, 0.5);
-  }
-  100% { 
-    box-shadow: 
-      0 0 30px #FFD700,
-      0 0 60px rgba(255, 215, 0, 0.5);
-  }
+  0%  { box-shadow: 0 0 30px #FFD700; }
+  50% { box-shadow: 0 0 60px #FFD700, 0 0 100px rgba(255,165,0,0.6); }
+  100%{ box-shadow: 0 0 30px #FFD700; }
 }
 
 #completeScreen button:hover {
-  transform: scale(1.15);
-  box-shadow: 
-    0 0 50px #FFD700,
-    0 0 100px rgba(255, 215, 0, 0.8),
-    inset 0 0 30px rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
 }
 
 #completeScreen button:active {
   transform: scale(0.95);
 }
 
-/* confetti */
+/* ========================= */
+/* CONFETTI E PARTÍCULAS */
+/* ========================= */
 .confetti {
   position: fixed;
   width: 8px;
@@ -514,16 +462,13 @@ canvas {
   opacity: 0.9;
   z-index: 9999;
   animation: fall linear forwards;
+  pointer-events: none;
 }
 
 @keyframes fall {
-  to {
-    transform: translateY(100vh) rotate(720deg);
-    opacity: 0;
-  }
+  to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
 }
 
-/* partículas */
 .particle {
   position: fixed;
   width: 6px;
@@ -535,178 +480,83 @@ canvas {
 }
 
 @keyframes explode {
-  to {
-    transform: translate(var(--x), var(--y)) scale(0);
-    opacity: 0;
-  }
-}
-
-/* h1 */
-h1 {
-  font-size: 3rem;
-  margin-top: 20px;
-  text-shadow: 0 0 20px cyan;
-}
-
-/* status */
-#status {
-  font-size: 1.2rem;
-  margin: 10px 0;
-}
-
-/* info */
-.info {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin: 20px 0;
-}
-
-.info span {
-  font-size: 1.2rem;
+  to { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
 }
 
 /* ========================= */
-/* 📱 MOBILE RESPONSIVO */
+/* 📱 TABLET (≤ 1024px) */
 /* ========================= */
-
-@media (max-width: 768px) {
-  body {
-    overflow-x: hidden;
-  }
+@media (max-width: 1024px) {
+  :root { --card-size: 90px; }
 
   .grid {
-    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
-    gap: 6px;
-    padding: 8px;
-    margin-top: 18px;
-    justify-items: center;
+    max-width: 600px;
+    gap: 10px;
+  }
+}
+
+/* ========================= */
+/* 📱 MOBILE GRANDE (≤ 768px) */
+/* ========================= */
+@media (max-width: 768px) {
+  :root { --card-size: 72px; }
+
+  .cursor { display: none !important; }
+
+  body { overflow-x: hidden; }
+
+  h1 { font-size: 1.7rem; }
+  #status { font-size: 0.95rem; }
+
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(var(--card-size), 1fr));
+    gap: 7px;
+    padding: 0 8px;
+    max-width: 100%;
   }
 
-  .card {
-    width: 100%;
-    max-width: 70px;
-    aspect-ratio: 1 / 1;
+  .back { font-size: 1.5rem; }
+  .golden .back { font-size: 1.6rem; }
+
+  .info {
+    flex-direction: row;
+    gap: 16px;
   }
 
-  .back {
-    font-size: 1.3rem;
+  .info span { font-size: 0.8rem; }
+}
+
+/* ========================= */
+/* 📱 MOBILE PEQUENO (≤ 480px) */
+/* ========================= */
+@media (max-width: 480px) {
+  :root { --card-size: 60px; }
+
+  h1 { font-size: 1.4rem; }
+
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(var(--card-size), 1fr));
+    gap: 5px;
+    padding: 0 6px;
   }
 
-  #menu h2 {
-    font-size: 2rem;
-  }
-
-  #menu button {
-    font-size: 1.2rem;
-    padding: 12px 25px;
-  }
-
-  #winScreen h2 {
-    font-size: 2rem;
-    text-align: center;
-  }
-
-  #winScreen p {
-    font-size: 1rem;
-    text-align: center;
-  }
-
-  #winScreen button {
-    font-size: 1.2rem;
-    padding: 12px 25px;
-  }
-
-  /* Complete screen mobile */
-  #completeScreen h2 {
-    font-size: 1.8rem;
-    padding: 0 10px;
-  }
-
-  #completeScreen p {
-    font-size: 1.1rem;
-  }
-
-  #completeScreen button {
-    font-size: 1.3rem;
-    padding: 15px 30px;
-  }
-
-  h1 {
-    font-size: 2rem;
-  }
-
-  #status {
-    font-size: 1rem;
-  }
+  .back { font-size: 1.1rem; }
+  .golden .back { font-size: 1.2rem; }
 
   .info {
     flex-direction: column;
-    gap: 10px;
+    gap: 6px;
   }
 
-  .info span {
-    font-size: 1rem;
-  }
-
-  .cursor {
-    display: none;
-  }
+  #gameArea { padding: 10px 8px 24px; }
 }
 
-@media (max-width: 480px) {
-  .card {
-    width: 100%;
-    max-width: 60px;
-    aspect-ratio: 1 / 1;
-  }
+/* ========================= */
+/* 📱 MOBILE MUITO PEQUENO (≤ 360px) */
+/* ========================= */
+@media (max-width: 360px) {
+  :root { --card-size: 52px; }
 
-  .back {
-    font-size: 1rem;
-  }
-
-  .grid {
-    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
-    gap: 5px;
-    padding: 5px;
-  }
-
-  h1 {
-    font-size: 1.8rem;
-  }
-
-  #menu h2 {
-    font-size: 1.8rem;
-  }
-
-  #menu button {
-    font-size: 1rem;
-    padding: 10px 20px;
-  }
-
-  #winScreen h2 {
-    font-size: 1.8rem;
-  }
-
-  #winScreen p {
-    font-size: 0.9rem;
-  }
-
-  #winScreen button {
-    font-size: 1rem;
-    padding: 10px 20px;
-  }
-
-  #completeScreen h2 {
-    font-size: 1.5rem;
-  }
-
-  #completeScreen p {
-    font-size: 0.9rem;
-  }
-
-  #completeScreen button {
-    font-size: 1.1rem;
-    padding: 12px 25px;
-  }
+  h1 { font-size: 1.2rem; }
+  .back { font-size: 0.9rem; }
 }
