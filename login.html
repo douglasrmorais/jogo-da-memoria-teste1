@@ -20,7 +20,6 @@
       position: relative;
     }
 
-    /* Grade animada de fundo */
     body::before {
       content: '';
       position: fixed;
@@ -38,7 +37,6 @@
       100% { transform: translateY(60px); }
     }
 
-    /* Brilhos de fundo */
     .bg-glow {
       position: fixed;
       border-radius: 50%;
@@ -68,7 +66,6 @@
       to   { transform: translate(-80px, -60px); }
     }
 
-    /* Container principal */
     .login-container {
       position: relative;
       z-index: 10;
@@ -83,7 +80,6 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* Caixa do login */
     .login-box {
       background: rgba(10, 10, 20, 0.85);
       border: 1px solid rgba(0, 255, 255, 0.2);
@@ -98,7 +94,6 @@
       overflow: hidden;
     }
 
-    /* Linha decorativa no topo */
     .login-box::before {
       content: '';
       position: absolute;
@@ -107,7 +102,6 @@
       background: linear-gradient(90deg, transparent, cyan, transparent);
     }
 
-    /* Ícone / logo */
     .logo-wrap {
       text-align: center;
       margin-bottom: 32px;
@@ -154,7 +148,6 @@
       margin-top: 4px;
     }
 
-    /* Separador */
     .divider {
       display: flex;
       align-items: center;
@@ -174,7 +167,6 @@
       letter-spacing: 0.1em;
     }
 
-    /* Label */
     label {
       display: block;
       font-size: 0.78rem;
@@ -185,7 +177,6 @@
       margin-bottom: 8px;
     }
 
-    /* Input */
     .input-wrap {
       position: relative;
       margin-bottom: 20px;
@@ -216,7 +207,6 @@
       box-shadow: 0 0 0 3px rgba(0,255,255,0.08);
     }
 
-    /* Botão entrar */
     .btn-enter {
       width: 100%;
       padding: 15px;
@@ -250,7 +240,6 @@
     .btn-enter:hover::after { opacity: 1; }
     .btn-enter:active { transform: translateY(0) scale(0.98); }
 
-    /* Erro */
     .error-msg {
       min-height: 20px;
       font-size: 0.85rem;
@@ -261,7 +250,6 @@
       transition: opacity 0.3s;
     }
 
-    /* Rodapé da caixa */
     .login-footer {
       text-align: center;
       margin-top: 28px;
@@ -270,7 +258,6 @@
       letter-spacing: 0.05em;
     }
 
-    /* Cursor customizado */
     .cursor {
       position: fixed;
       width: 16px; height: 16px;
@@ -283,7 +270,6 @@
       z-index: 9999;
     }
 
-    /* Responsivo */
     @media (max-width: 480px) {
       .login-box { padding: 36px 24px; }
       .logo-title { font-size: 1.3rem; }
@@ -344,7 +330,12 @@
       if (e.key === "Enter") entrar();
     });
 
-    // Função de login
+    // ✅ CORRIGIDO: Gera um ID de sessão único para cada login
+    // Assim, dois usuários com o mesmo nome nunca compartilham dados
+    function gerarSessionId() {
+      return "sess_" + Date.now() + "_" + Math.random().toString(36).slice(2, 9);
+    }
+
     function entrar() {
       const input    = document.getElementById("username");
       const errorMsg = document.getElementById("errorMsg");
@@ -359,14 +350,15 @@
         return;
       }
 
-      // Salva sessão
-      localStorage.setItem("memoryrace_user", username);
+      // ✅ Cada sessão recebe um ID único — resolve o problema de nomes iguais
+      const sessionId = gerarSessionId();
 
-      // Se não houver progresso salvo (jogo zerado ou primeira vez), força nível 1
-      const savedLevel = localStorage.getItem("memoryrace_level_" + username);
-      if (!savedLevel) {
-        localStorage.setItem("memoryrace_level_" + username, 1);
-      }
+      // Salva a sessão atual com nome + ID único
+      const sessao = { nome: username, sessionId: sessionId };
+      localStorage.setItem("memoryrace_sessao_atual", JSON.stringify(sessao));
+
+      // Sempre começa do nível 1 — sem herdar dados de outra sessão
+      localStorage.setItem("memoryrace_level_" + sessionId, 1);
 
       window.location.href = "index.html";
     }

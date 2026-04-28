@@ -9,7 +9,9 @@ const gameArea  = document.getElementById("gameArea");
 let level = 1;
 let cards = [];
 
-const levelConfig = [4, 6, 8];
+// ✅ Apenas 3 fases existem — isso garante que nunca passe disso
+const TOTAL_LEVELS = 3;
+const levelConfig  = [4, 6, 8];
 
 const baseSymbols = [
   "⚡","🚀","🧠","💻","👾","🔮","🛰️","🤖","🔥","🌙",
@@ -23,7 +25,10 @@ let score  = 0;
 let time   = 0;
 let timer;
 
-let currentUser = null;
+// ✅ Cada sessão agora tem um nome (exibição) e um sessionId único
+// Isso resolve o problema de dois usuários com o mesmo nome compartilharem dados
+let currentUser      = null;  // nome para exibição
+let currentSessionId = null;  // chave única de armazenamento
 
 // =========================
 // 🖱️ CURSOR — só aparece se o usuário usa mouse
@@ -44,7 +49,7 @@ document.addEventListener("touchstart", () => {
 }, { passive: true });
 
 // =========================
-// 🔐 SISTEMA DE LOGIN
+// 🔐 SISTEMA DE SESSÃO
 // =========================
 window.onload = () => {
   setTimeout(() => {
@@ -54,17 +59,40 @@ window.onload = () => {
 };
 
 function checkLogin() {
-  const savedUser = localStorage.getItem("memoryrace_user");
+  // ✅ Lê a sessão atual (objeto com nome + sessionId único)
+  const sessaoRaw = localStorage.getItem("memoryrace_sessao_atual");
 
-  if (!savedUser) {
+  if (!sessaoRaw) {
     window.location.href = "login.html";
     return;
   }
 
-  currentUser = savedUser;
+  let sessao;
+  try {
+    sessao = JSON.parse(sessaoRaw);
+  } catch (e) {
+    // Dado corrompido — manda pro login
+    localStorage.removeItem("memoryrace_sessao_atual");
+    window.location.href = "login.html";
+    return;
+  }
 
-  const savedLevel = localStorage.getItem("memoryrace_level_" + currentUser);
-  level = savedLevel ? parseInt(savedLevel) : 1;
+  // Valida estrutura da sessão
+  if (!sessao.nome || !sessao.sessionId) {
+    localStorage.removeItem("memoryrace_sessao_atual");
+    window.location.href = "login.html";
+    return;
+  }
+
+  currentUser      = sessao.nome;
+  currentSessionId = sessao.sessionId;
+
+  // ✅ Nível lido pela sessionId única — nunca vai pegar dados de outra pessoa
+  const savedLevel = localStorage.getItem("memoryrace_level_" + currentSessionId);
+  level = savedLevel ? Math.min(parseInt(savedLevel), TOTAL_LEVELS) : 1;
+
+  // ✅ Garante que o nível nunca ultrapasse o máximo existente
+  if (level < 1 || isNaN(level)) level = 1;
 
   showMenu();
 }
@@ -74,10 +102,11 @@ function showMenu() {
   document.getElementById("menu").style.display = "flex";
 
   const userWelcome = document.getElementById("userWelcome");
-  const savedLevel  = localStorage.getItem("memoryrace_level_" + currentUser);
+  const savedLevel  = localStorage.getItem("memoryrace_level_" + currentSessionId);
+  const lvl         = savedLevel ? Math.min(parseInt(savedLevel), TOTAL_LEVELS) : 1;
 
-  if (savedLevel && parseInt(savedLevel) > 1) {
-    userWelcome.textContent = `Bem-vindo de volta, ${currentUser}! Você está no nível ${savedLevel}`;
+  if (lvl > 1) {
+    userWelcome.textContent = `Bem-vindo de volta, ${currentUser}! Você está no nível ${lvl}`;
   } else {
     userWelcome.textContent = `Bem-vindo, ${currentUser}!`;
   }
@@ -85,8 +114,13 @@ function showMenu() {
 
 function logout() {
   clearInterval(timer);
-  currentUser = null;
-  localStorage.removeItem("memoryrace_user");
+
+  // ✅ Remove apenas a sessão atual — não afeta dados de outras sessões
+  localStorage.removeItem("memoryrace_sessao_atual");
+
+  currentUser      = null;
+  currentSessionId = null;
+
   window.location.href = "login.html";
 }
 
@@ -97,8 +131,12 @@ function startGame() {
   document.getElementById("menu").style.display = "none";
   gameArea.style.display = "flex";
 
-  const savedLevel = localStorage.getItem("memoryrace_level_" + currentUser);
-  level = savedLevel ? parseInt(savedLevel) : 1;
+  // ✅ Usa sessionId único para ler o nível salvo
+  const savedLevel = localStorage.getItem("memoryrace_level_" + currentSessionId);
+  level = savedLevel ? Math.min(parseInt(savedLevel), TOTAL_LEVELS) : 1;
+
+  // ✅ Proteção extra: nunca deixa o nível ser inválido
+  if (level < 1 || isNaN(level)) level = 1;
 
   score = 0;
   time  = 0;
@@ -130,7 +168,10 @@ function startTimer() {
 function generateGame() {
   grid.innerHTML = "";
 
-  const pairCount = levelConfig[level - 1];
+  // ✅ Garante que o nível nunca saia do intervalo válido (1–3)
+  const safeLevel = Math.max(1, Math.min(level, TOTAL_LEVELS));
+  const pairCount = levelConfig[safeLevel - 1];
+
   let selected = baseSymbols.slice(0, pairCount);
   cards = [...selected, ...selected];
   cards.sort(() => Math.random() - 0.5);
@@ -138,7 +179,6 @@ function generateGame() {
   const totalCards = cards.length;
   const columns    = Math.ceil(Math.sqrt(totalCards));
 
-  // Define colunas fixas apenas no desktop
   if (window.innerWidth > 768) {
     grid.style.gridTemplateColumns = `repeat(${columns}, var(--card-size, 100px))`;
   } else {
@@ -148,7 +188,7 @@ function generateGame() {
   cards.forEach(symbol => {
     const card = document.createElement("div");
     card.classList.add("card");
-    if (level === 3) card.classList.add("golden");
+    if (safeLevel === 3) card.classList.add("golden");
 
     card.innerHTML = `
       <div class="inner">
@@ -221,7 +261,7 @@ function checkWin() {
   lock = true;
   clearInterval(timer);
 
-  if (level === 3) {
+  if (level === TOTAL_LEVELS) {
     showCompleteScreen();
   } else {
     const m = String(Math.floor(time / 60)).padStart(2, "0");
@@ -244,26 +284,29 @@ function checkWin() {
 }
 
 // =========================
-// 🥇 TELA COMPLETA — OURO
+// 🥇 TELA COMPLETA — ÚLTIMA FASE
 // =========================
 function showCompleteScreen() {
   const m = String(Math.floor(time / 60)).padStart(2, "0");
   const s = String(time % 60).padStart(2, "0");
   document.getElementById("completeFinalTime").textContent = `Seu tempo: ${m}:${s}`;
 
-  const key  = "bestTime_" + (currentUser || "guest") + "_level_3";
+  // ✅ Recorde salvo por sessionId — não mistura com outras sessões
+  const key  = "bestTime_" + currentSessionId + "_level_" + TOTAL_LEVELS;
   const best = localStorage.getItem(key);
 
   if (!best || time < parseInt(best)) {
     localStorage.setItem(key, time);
     document.getElementById("completeBest").textContent = "🥇 Novo recorde!";
   } else {
-    const bm = String(Math.floor(best / 60)).padStart(2, "0");
-    const bs = String(best % 60).padStart(2, "0");
+    const bm = String(Math.floor(parseInt(best) / 60)).padStart(2, "0");
+    const bs = String(parseInt(best) % 60).padStart(2, "0");
     document.getElementById("completeBest").textContent = `Recorde: ${bm}:${bs}`;
   }
 
-  if (currentUser) localStorage.removeItem("memoryrace_level_" + currentUser);
+  // ✅ Ao completar todas as fases, remove o nível salvo da sessionId atual
+  // Na próxima vez que esse mesmo usuário jogar, começa do nível 1 normalmente
+  localStorage.removeItem("memoryrace_level_" + currentSessionId);
 
   document.getElementById("completeScreen").style.display = "flex";
   finalGoldExplosion();
@@ -274,7 +317,8 @@ function showCompleteScreen() {
 // ➜ PRÓXIMO NÍVEL
 // =========================
 function nextLevel() {
-  if (level >= 3) return;
+  // ✅ Proteção: nunca avança além do total de fases existentes
+  if (level >= TOTAL_LEVELS) return;
 
   level++;
   score = 0;
@@ -295,43 +339,63 @@ function nextLevel() {
 }
 
 // =========================
-// 🔄 REINICIAR
+// 🔄 REINICIAR — volta ao menu sem deslogar
 // =========================
 function restartGame() {
   clearInterval(timer);
-  localStorage.removeItem("memoryrace_user");
-  currentUser = null;
-  window.location.href = "login.html";
+
+  // ✅ Reseta o nível para 1 na sessionId atual e volta ao menu
+  // Não desloga o usuário nem remove a sessão
+  level = 1;
+  if (currentSessionId) {
+    localStorage.setItem("memoryrace_level_" + currentSessionId, 1);
+  }
+
+  score = 0;
+  time  = 0;
+  first = second = null;
+  lock  = false;
+
+  document.getElementById("winScreen").style.display      = "none";
+  document.getElementById("completeScreen").style.display = "none";
+  document.body.style.background = "#000";
+
+  showMenu();
 }
 
 // =========================
 // 💾 PROGRESSO E RECORDE
 // =========================
 function saveProgress() {
-  if (currentUser) localStorage.setItem("memoryrace_level_" + currentUser, level);
+  // ✅ Salva o nível pela sessionId — isolado por usuário/sessão
+  if (currentSessionId) {
+    const safeLevel = Math.min(level, TOTAL_LEVELS);
+    localStorage.setItem("memoryrace_level_" + currentSessionId, safeLevel);
+  }
 }
 
 function saveScore(t) {
-  const key  = "bestTime_" + (currentUser || "guest") + "_level_" + level;
+  // ✅ Recorde também salvo por sessionId
+  const key  = "bestTime_" + (currentSessionId || "guest") + "_level_" + level;
   const best = localStorage.getItem(key);
 
   if (!best || t < parseInt(best)) {
     localStorage.setItem(key, t);
     bestText.textContent = "Novo recorde!";
   } else {
-    const bm = String(Math.floor(best / 60)).padStart(2, "0");
-    const bs = String(best % 60).padStart(2, "0");
+    const bm = String(Math.floor(parseInt(best) / 60)).padStart(2, "0");
+    const bs = String(parseInt(best) % 60).padStart(2, "0");
     bestText.textContent = `Recorde: ${bm}:${bs}`;
   }
 }
 
 function loadBestTime() {
-  const key  = "bestTime_" + (currentUser || "guest") + "_level_" + level;
+  const key  = "bestTime_" + (currentSessionId || "guest") + "_level_" + level;
   const best = localStorage.getItem(key);
 
   if (best) {
-    const bm = String(Math.floor(best / 60)).padStart(2, "0");
-    const bs = String(best % 60).padStart(2, "0");
+    const bm = String(Math.floor(parseInt(best) / 60)).padStart(2, "0");
+    const bs = String(parseInt(best) % 60).padStart(2, "0");
     bestText.textContent = `Recorde: ${bm}:${bs}`;
   } else {
     bestText.textContent = "Sem recorde ainda";
