@@ -111,14 +111,12 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 72px;
-      height: 72px;
+      width: 72px; height: 72px;
       border-radius: 50%;
       border: 2px solid rgba(0,255,255,0.3);
       background: rgba(0,255,255,0.05);
       font-size: 2rem;
       margin-bottom: 16px;
-      position: relative;
       animation: iconPulse 3s ease-in-out infinite;
     }
 
@@ -134,11 +132,7 @@
       color: #fff;
       letter-spacing: 0.05em;
     }
-
-    .logo-title span {
-      color: cyan;
-      text-shadow: 0 0 20px cyan;
-    }
+    .logo-title span { color: cyan; text-shadow: 0 0 20px cyan; }
 
     .logo-sub {
       font-size: 0.85rem;
@@ -154,8 +148,7 @@
       gap: 12px;
       margin: 28px 0;
     }
-    .divider::before,
-    .divider::after {
+    .divider::before, .divider::after {
       content: '';
       flex: 1;
       height: 1px;
@@ -182,7 +175,10 @@
       margin-bottom: 20px;
     }
 
-    input[type="text"] {
+    .input-wrap.has-toggle input { padding-right: 48px; }
+
+    input[type="text"],
+    input[type="password"] {
       width: 100%;
       padding: 14px 18px;
       background: rgba(255,255,255,0.04);
@@ -197,15 +193,107 @@
       letter-spacing: 0.05em;
     }
 
-    input[type="text"]::placeholder {
-      color: rgba(255,255,255,0.2);
-    }
+    input::placeholder { color: rgba(255,255,255,0.2); }
 
-    input[type="text"]:focus {
+    input[type="text"]:focus,
+    input[type="password"]:focus {
       border-color: rgba(0,255,255,0.5);
       background: rgba(0,255,255,0.04);
       box-shadow: 0 0 0 3px rgba(0,255,255,0.08);
     }
+
+    .toggle-pw {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: rgba(255,255,255,0.3);
+      font-size: 1.1rem;
+      padding: 4px;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+    .toggle-pw:hover { color: cyan; }
+
+    /* ── Regras de senha ── */
+    .pw-rules {
+      margin-top: -12px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .pw-rule {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.76rem;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0.03em;
+      transition: color 0.3s;
+    }
+
+    .pw-rule .rule-icon {
+      font-size: 0.7rem;
+      width: 16px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    /* Estado: regra satisfeita */
+    .pw-rule.ok {
+      color: cyan;
+    }
+    .pw-rule.ok .rule-icon {
+      color: cyan;
+      text-shadow: 0 0 8px cyan;
+    }
+
+    /* ── Barra de força ── */
+    .strength-wrap {
+      margin-top: -8px;
+      margin-bottom: 20px;
+    }
+
+    .strength-label {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .strength-label span:last-child {
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .strength-bar {
+      height: 4px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.07);
+      overflow: hidden;
+    }
+
+    .strength-fill {
+      height: 100%;
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.4s ease, background 0.4s ease;
+    }
+
+    /* Cores da força */
+    .strength-fill.fraca    { background: #ff4d4d; box-shadow: 0 0 6px #ff4d4d; }
+    .strength-fill.media    { background: #ffaa00; box-shadow: 0 0 6px #ffaa00; }
+    .strength-fill.boa      { background: #00e5ff; box-shadow: 0 0 6px #00e5ff; }
+    .strength-fill.forte    { background: #00ff88; box-shadow: 0 0 8px #00ff88; }
 
     .btn-enter {
       width: 100%;
@@ -233,12 +321,20 @@
       transition: opacity 0.2s;
     }
 
-    .btn-enter:hover {
+    /* Botão desabilitado enquanto senha inválida */
+    .btn-enter:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    .btn-enter:not(:disabled):hover {
       transform: translateY(-2px);
       box-shadow: 0 8px 30px rgba(0,255,255,0.4);
     }
-    .btn-enter:hover::after { opacity: 1; }
-    .btn-enter:active { transform: translateY(0) scale(0.98); }
+    .btn-enter:not(:disabled):hover::after { opacity: 1; }
+    .btn-enter:not(:disabled):active { transform: translateY(0) scale(0.98); }
 
     .error-msg {
       min-height: 20px;
@@ -247,7 +343,16 @@
       text-align: center;
       margin-top: 14px;
       letter-spacing: 0.03em;
-      transition: opacity 0.3s;
+    }
+
+    .success-msg {
+      min-height: 20px;
+      font-size: 0.85rem;
+      color: cyan;
+      text-align: center;
+      margin-top: 14px;
+      letter-spacing: 0.03em;
+      display: none;
     }
 
     .login-footer {
@@ -266,7 +371,6 @@
       pointer-events: none;
       transform: translate(-50%, -50%);
       box-shadow: 0 0 15px cyan, 0 0 30px rgba(0,255,255,0.3);
-      transition: transform 0.1s;
       z-index: 9999;
     }
 
@@ -294,6 +398,7 @@
 
       <div class="divider"><span>identificação</span></div>
 
+      <!-- Nome -->
       <label for="username">Seu nome</label>
       <div class="input-wrap">
         <input
@@ -306,9 +411,50 @@
         />
       </div>
 
-      <button class="btn-enter" onclick="entrar()">ENTRAR NO JOGO</button>
+      <!-- Senha -->
+      <label for="password">Sua senha</label>
+      <div class="input-wrap has-toggle">
+        <input
+          type="password"
+          id="password"
+          placeholder="Digite sua senha..."
+          maxlength="30"
+          autocomplete="off"
+        />
+        <button class="toggle-pw" onclick="toggleSenha()" tabindex="-1" type="button">👁</button>
+      </div>
 
-      <div class="error-msg" id="errorMsg"></div>
+      <!-- Regras visuais -->
+      <div class="pw-rules">
+        <div class="pw-rule" id="rule-len">
+          <span class="rule-icon">○</span>
+          <span>Mínimo 8 caracteres</span>
+        </div>
+        <div class="pw-rule" id="rule-letra">
+          <span class="rule-icon">○</span>
+          <span>Pelo menos 1 letra (a–z ou A–Z)</span>
+        </div>
+        <div class="pw-rule" id="rule-numero">
+          <span class="rule-icon">○</span>
+          <span>Pelo menos 1 número (0–9)</span>
+        </div>
+      </div>
+
+      <!-- Barra de força -->
+      <div class="strength-wrap">
+        <div class="strength-label">
+          <span>Força da senha</span>
+          <span id="strength-text">—</span>
+        </div>
+        <div class="strength-bar">
+          <div class="strength-fill" id="strength-fill"></div>
+        </div>
+      </div>
+
+      <button class="btn-enter" id="btnEntrar" onclick="entrar()" disabled>ENTRAR NO JOGO</button>
+
+      <div class="error-msg"   id="errorMsg"></div>
+      <div class="success-msg" id="successMsg"></div>
 
       <div class="login-footer">
         Seu progresso é salvo automaticamente
@@ -325,48 +471,184 @@
       c.style.top  = e.clientY + "px";
     });
 
-    // Enter no input
+    // Enter navega entre campos
     document.getElementById("username").addEventListener("keydown", e => {
+      if (e.key === "Enter") document.getElementById("password").focus();
+    });
+    document.getElementById("password").addEventListener("keydown", e => {
       if (e.key === "Enter") entrar();
     });
 
-    // ✅ CORRIGIDO: Gera um ID de sessão único para cada login
-    // Assim, dois usuários com o mesmo nome nunca compartilham dados
+    // Mostrar / ocultar senha
+    function toggleSenha() {
+      const campo = document.getElementById("password");
+      campo.type  = campo.type === "password" ? "text" : "password";
+    }
+
+    // ─────────────────────────────────────────────────────
+    // VALIDAÇÃO E FORÇA DA SENHA — atualiza em tempo real
+    // ─────────────────────────────────────────────────────
+    const senhaInput = document.getElementById("password");
+
+    senhaInput.addEventListener("input", () => {
+      const senha = senhaInput.value;
+      atualizarRegras(senha);
+      atualizarForca(senha);
+    });
+
+    function atualizarRegras(senha) {
+      const temLen    = senha.length >= 8;
+      const temLetra  = /[a-zA-Z]/.test(senha);
+      const temNumero = /[0-9]/.test(senha);
+
+      marcarRegra("rule-len",    temLen);
+      marcarRegra("rule-letra",  temLetra);
+      marcarRegra("rule-numero", temNumero);
+
+      // Habilita o botão só quando todas as regras passam
+      document.getElementById("btnEntrar").disabled = !(temLen && temLetra && temNumero);
+    }
+
+    function marcarRegra(id, ok) {
+      const el   = document.getElementById(id);
+      const icon = el.querySelector(".rule-icon");
+      if (ok) {
+        el.classList.add("ok");
+        icon.textContent = "✔";
+      } else {
+        el.classList.remove("ok");
+        icon.textContent = "○";
+      }
+    }
+
+    function atualizarForca(senha) {
+      // Critérios de força
+      const temLen8      = senha.length >= 8;
+      const temLen12     = senha.length >= 12;
+      const temLetra     = /[a-zA-Z]/.test(senha);
+      const temNumero    = /[0-9]/.test(senha);
+      const temMaiuscula = /[A-Z]/.test(senha);
+      const temEspecial  = /[^a-zA-Z0-9]/.test(senha);
+
+      // Pontuação: cada critério vale 1 ponto
+      let pontos = 0;
+      if (temLetra)     pontos++;
+      if (temNumero)    pontos++;
+      if (temLen8)      pontos++;
+      if (temMaiuscula) pontos++;
+      if (temEspecial)  pontos++;
+      if (temLen12)     pontos++;
+
+      const fill = document.getElementById("strength-fill");
+      const text = document.getElementById("strength-text");
+
+      if (senha.length === 0) {
+        fill.style.width = "0%";
+        fill.className   = "strength-fill";
+        text.textContent = "—";
+        text.style.color = "rgba(255,255,255,0.25)";
+        return;
+      }
+
+      // Mapeia pontuação para níveis
+      if (pontos <= 1) {
+        fill.style.width = "20%";
+        fill.className   = "strength-fill fraca";
+        text.textContent = "Muito fraca";
+        text.style.color = "#ff4d4d";
+      } else if (pontos <= 2) {
+        fill.style.width = "40%";
+        fill.className   = "strength-fill fraca";
+        text.textContent = "Fraca";
+        text.style.color = "#ff4d4d";
+      } else if (pontos === 3) {
+        fill.style.width = "60%";
+        fill.className   = "strength-fill media";
+        text.textContent = "Média";
+        text.style.color = "#ffaa00";
+      } else if (pontos === 4) {
+        fill.style.width = "80%";
+        fill.className   = "strength-fill boa";
+        text.textContent = "Boa";
+        text.style.color = "#00e5ff";
+      } else {
+        fill.style.width = "100%";
+        fill.className   = "strength-fill forte";
+        text.textContent = "Forte 🔒";
+        text.style.color = "#00ff88";
+      }
+    }
+
+    // ─────────────────────────────────────────────────────
+    // BANCO DE USUÁRIOS
+    //
+    // "memoryrace_usuarios" → {
+    //   "João||abc123": { sessionId, nome, criadoEm },
+    //   "Maria||xyz789": { ... }
+    // }
+    // ─────────────────────────────────────────────────────
+
+    function carregarUsuarios() {
+      try { return JSON.parse(localStorage.getItem("memoryrace_usuarios")) || {}; }
+      catch (e) { return {}; }
+    }
+
+    function salvarUsuarios(u) {
+      localStorage.setItem("memoryrace_usuarios", JSON.stringify(u));
+    }
+
     function gerarSessionId() {
       return "sess_" + Date.now() + "_" + Math.random().toString(36).slice(2, 9);
     }
 
     function entrar() {
-      const input    = document.getElementById("username");
-      const errorMsg = document.getElementById("errorMsg");
-      const username = input.value.trim();
+      const nome  = document.getElementById("username").value.trim();
+      const senha = document.getElementById("password").value.trim();
 
-      if (username.length < 2) {
-        mostrarErro("Nome deve ter pelo menos 2 caracteres.");
-        return;
+      // Validação do nome
+      if (nome.length < 2)  { mostrarErro("Nome deve ter pelo menos 2 caracteres.");  return; }
+      if (nome.length > 20) { mostrarErro("Nome deve ter no máximo 20 caracteres.");  return; }
+
+      // Validação da senha (dupla confirmação — o botão já deveria estar bloqueado)
+      if (senha.length < 8)        { mostrarErro("Senha deve ter pelo menos 8 caracteres."); return; }
+      if (!/[a-zA-Z]/.test(senha)) { mostrarErro("A senha deve conter pelo menos uma letra."); return; }
+      if (!/[0-9]/.test(senha))    { mostrarErro("A senha deve conter pelo menos um número."); return; }
+
+      const chave    = nome + "||" + senha;
+      const usuarios = carregarUsuarios();
+
+      if (usuarios[chave]) {
+        // Usuário existente — entra com progresso salvo
+        const sessao = { nome: usuarios[chave].nome, sessionId: usuarios[chave].sessionId };
+        localStorage.setItem("memoryrace_sessao_atual", JSON.stringify(sessao));
+        window.location.href = "index.html";
+      } else {
+        // Novo usuário — cria conta
+        const sessionId  = gerarSessionId();
+        usuarios[chave]  = { sessionId, nome, criadoEm: Date.now() };
+        salvarUsuarios(usuarios);
+
+        const sessao = { nome, sessionId };
+        localStorage.setItem("memoryrace_sessao_atual", JSON.stringify(sessao));
+        localStorage.setItem("memoryrace_level_" + sessionId, 1);
+
+        mostrarSucesso("✅ Conta criada! Entrando no jogo...");
+        setTimeout(() => { window.location.href = "index.html"; }, 900);
       }
-      if (username.length > 20) {
-        mostrarErro("Nome deve ter no máximo 20 caracteres.");
-        return;
-      }
-
-      // ✅ Cada sessão recebe um ID único — resolve o problema de nomes iguais
-      const sessionId = gerarSessionId();
-
-      // Salva a sessão atual com nome + ID único
-      const sessao = { nome: username, sessionId: sessionId };
-      localStorage.setItem("memoryrace_sessao_atual", JSON.stringify(sessao));
-
-      // Sempre começa do nível 1 — sem herdar dados de outra sessão
-      localStorage.setItem("memoryrace_level_" + sessionId, 1);
-
-      window.location.href = "index.html";
     }
 
     function mostrarErro(msg) {
+      document.getElementById("successMsg").style.display = "none";
       const el = document.getElementById("errorMsg");
       el.textContent = msg;
       setTimeout(() => { el.textContent = ""; }, 3000);
+    }
+
+    function mostrarSucesso(msg) {
+      document.getElementById("errorMsg").textContent = "";
+      const el = document.getElementById("successMsg");
+      el.textContent   = msg;
+      el.style.display = "block";
     }
   </script>
 </body>
